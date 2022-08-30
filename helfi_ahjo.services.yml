@@ -1,0 +1,4 @@
+services:
+  helfi_ahjo.taxonomy_utils:
+    class: Drupal\helfi_ahjo\Utils\TaxonomyUtils
+    arguments: [ '@entity_type.manager' ]
