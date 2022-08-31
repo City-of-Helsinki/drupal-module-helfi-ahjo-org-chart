@@ -1,5 +1,6 @@
 <?php
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
+use Drupal\Component\Serialization\Json;
 
 /**
  * Implements hook_entity_form_display_alter().
@@ -22,7 +23,7 @@ function helfi_ahjo_entity_form_display_alter(EntityFormDisplayInterface $form_d
  */
 function helfi_ahjo_theme($existing, $type, $theme, $path) {
   return [
-    'hierarchical_taxonomy_menu' => [
+    'hierarchical_taxonomy_tree' => [
       'variables' => [
         'menu_tree' => [],
         'route_tid' => NULL,
@@ -34,4 +35,28 @@ function helfi_ahjo_theme($existing, $type, $theme, $path) {
     ],
   ];
 
+}
+
+/**
+ * Implements hook_cron().
+ */
+function helfi_ahjo_cron() {
+  /** @var int $last_run */
+  $last_run = \Drupal::state()->get('helfi_gredi_image.last_run', 0);
+  /** @var int $request_time */
+  $request_time = \Drupal::time()->getRequestTime();
+  // If 60 minutes passed since last time.
+  if (($request_time - $last_run) > 60 * 60 * 24) {
+    $jsonFile = Json::decode(file_get_contents(
+      \Drupal::service('extension.list.module')->getPath('helfi_ahjo')
+      . '/helsinkiorgchartesimerkki.json'));
+
+    $queue = \Drupal::queue('sote_section_update');
+    foreach ($jsonFile as $section) {
+      $queue->createItem($section);
+
+
+    }
+
+  }
 }

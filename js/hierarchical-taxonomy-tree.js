@@ -19,7 +19,7 @@
     });
 
     if (drupalSettings.interactiveParentMenu === false) {
-      $('.hierarchical-taxonomy-menu .menu-item--expanded > a').on('click', function (e) {
+      $('.hierarchical-taxonomy-tree .menu-item--expanded > a').on('click', function (e) {
         e.preventDefault();
         let isChildVisible = $(this).parent().children('.menu').is(':visible');
         if (isChildVisible) {
@@ -33,7 +33,7 @@
       });
     }
     else {
-      $('.hierarchical-taxonomy-menu .menu-item--expanded > .parent-toggle').on('click', function (e) {
+      $('.hierarchical-taxonomy-tree .menu-item--expanded > .parent-toggle').on('click', function (e) {
         e.preventDefault();
         $(this).closest('i').toggleClass('arrow-right arrow-down');
         let isChildVisible = $(this).parent().children('.menu').is(':visible');
@@ -46,6 +46,9 @@
           $(this).parent().addClass('active');
         }
       });
+      $('.hierarchical-taxonomy-tree > .menu-item--expanded').on('click', function (e) {
+        e.preventDefault();
+      })
     }
   });
 })(jQuery, Drupal, drupalSettings);

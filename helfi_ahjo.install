@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
@@ -20,26 +22,26 @@ function helfi_ahjo_install() {
     $vocabulary->save();
   }
 
-  \Drupal\field\Entity\FieldStorageConfig::create([
+  FieldStorageConfig::create([
     'field_name' => 'field_external_id',
     'entity_type' => 'taxonomy_term',
     'type' => 'text',
   ])->save();
 
-  \Drupal\field\Entity\FieldConfig::create([
+  FieldConfig::create([
     'field_name' => 'field_external_id',
     'entity_type' => 'taxonomy_term',
     'bundle' => 'sote_section',
     'label' => 'External ID',
   ])->save();
 
-  \Drupal\field\Entity\FieldStorageConfig::create([
+  FieldStorageConfig::create([
     'field_name' => 'field_external_parent_id',
     'entity_type' => 'taxonomy_term',
     'type' => 'text',
   ])->save();
 
-  \Drupal\field\Entity\FieldConfig::create([
+  FieldConfig::create([
     'field_name' => 'field_external_parent_id',
     'entity_type' => 'taxonomy_term',
     'bundle' => 'sote_section',
@@ -51,7 +53,13 @@ function helfi_ahjo_install() {
 /**
  * Implements hook_uninstall().
  */
-function helfi_ahjo_uninstall($is_syncing)
-{
+function helfi_ahjo_uninstall($is_syncing) {
   Vocabulary::load('sote_section')->delete();
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function helfi_ahjo_update_8101(&$sandbox) {
+  \Drupal::service('helfi_ahjo.ahjo_service')->insertData();
 }
