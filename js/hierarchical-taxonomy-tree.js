@@ -20,7 +20,6 @@
 
     $('.hierarchical-taxonomy-tree .menu-item--expanded > a').on('click', function (e) {
       e.preventDefault();
-      console.log($(this).closest('i'));
       $(this).next().toggleClass('arrow-right arrow-down');
       let isChildVisible = $(this).parent().children('.menu').is(':visible');
       if (isChildVisible) {
