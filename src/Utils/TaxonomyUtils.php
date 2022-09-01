@@ -4,15 +4,16 @@ namespace Drupal\helfi_ahjo\Utils;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
- * Class TaxonomyUtils
+ * Class TaxonomyUtils to create taxonomy tree.
  */
 class TaxonomyUtils {
 
   /**
-   * @var \Drupal\taxonomy\TermStorage
+   * TaxonomyUtils constructor.
+   *
+   * @param EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager.
    */
-  protected $taxonomyStorage;
-
   public function __construct(EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
   }
@@ -21,7 +22,7 @@ class TaxonomyUtils {
    * Loads the tree of a vocabulary.
    *
    * @param string $vocabulary
-   *   Machine name
+   *   Machine name.
    *
    * @return array
    */
@@ -39,8 +40,11 @@ class TaxonomyUtils {
    * Populates a tree array given a taxonomy term tree object.
    *
    * @param $tree
+   *   Tree param.
    * @param $object
+   *   Object param.
    * @param $vocabulary
+   *   Vocabulary param.
    * @param $interactive_parent
    */
   protected function buildTree(&$tree, $object, $vocabulary, $key = 0, $interactive_parent = TRUE) {

@@ -3,7 +3,7 @@
   {% for item in menu_tree %}
     {%
       set liClass = [
-      item.subitem and current_depth < max_depth ? 'menu-item menu-item--expanded block-taxonomymenu__menu-item block-taxonomymenu__menu-item--expanded' : 'menu-item block-taxonomymenu__menu-item',
+      item.subitem and current_depth < max_depth ? 'menu-item menu-item--expanded block-taxonomymenu__tree-item block-taxonomymenu__tree-item--expanded' : 'menu-item block-taxonomymenu__tree-item',
     ]
     %}
 <li class="{{ liClass|join(' ') }}">
@@ -30,6 +30,6 @@
     {% endmacro %}
 
     {% import _self as macros %}
-    <ul class="menu hierarchical-taxonomy-tree block-taxonomymenu__menu">
+    <ul class="menu hierarchical-taxonomy-tree block-taxonomymenu__tree">
       {{ macros.menu_links(menu_tree, 0, max_depth, collapsible) }}
     </ul>
