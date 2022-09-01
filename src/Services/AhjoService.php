@@ -84,7 +84,7 @@ class AhjoService implements ContainerInjectionInterface {
       $this->moduleExtensionList->getPath('helfi_ahjo')
       . '/helsinkiorgchartesimerkki.json');
 
-    return $this->levelBelow($jsonFile);
+    return $this->createTaxonomyTermsTree($jsonFile);
   }
 
   /**
@@ -104,7 +104,7 @@ class AhjoService implements ContainerInjectionInterface {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  function levelBelow($data, &$hierarchy = [], $parentId = NULL) {
+  private function createTaxonomyTermsTree($data, &$hierarchy = [], $parentId = NULL) {
     if (!is_array($data)) {
       $data = Json::decode($data);
     }
@@ -143,7 +143,7 @@ class AhjoService implements ContainerInjectionInterface {
         $term->save();
       }
       if (isset($content['OrganizationLevelBelow'])) {
-        $this->levelBelow($content['OrganizationLevelBelow'], $hierarchy, $content['ID']);
+        $this->createTaxonomyTermsTree($content['OrganizationLevelBelow'], $hierarchy, $content['ID']);
       }
 
     }
