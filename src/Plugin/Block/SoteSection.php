@@ -90,9 +90,6 @@ class SoteSection extends BlockBase implements ContainerFactoryPluginInterface {
         'library' => [
           'helfi_ahjo/hierarchical_taxonomy_tree',
         ],
-        'drupalSettings' => [
-          'interactiveParentMenu' => true,
-        ],
       ],
     ];
 

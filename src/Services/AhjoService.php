@@ -70,7 +70,7 @@ class AhjoService implements ContainerInjectionInterface {
   }
 
   /**
-   * Load data from api.
+   * Get data from api and add it as taxonomy terms tree.
    *
    * @return array|mixed
    *   Return array or mixed.

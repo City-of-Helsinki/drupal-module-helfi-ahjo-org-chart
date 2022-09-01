@@ -18,38 +18,20 @@
       }
     });
 
-    if (drupalSettings.interactiveParentMenu === false) {
-      $('.hierarchical-taxonomy-tree .menu-item--expanded > a').on('click', function (e) {
-        e.preventDefault();
-        let isChildVisible = $(this).parent().children('.menu').is(':visible');
-        if (isChildVisible) {
-          $(this).parent().children('.menu').slideUp();
-          $(this).parent().removeClass('active');
-        }
-        else {
-          $(this).parent().children('.menu').slideDown();
-          $(this).parent().addClass('active');
-        }
-      });
-    }
-    else {
-      $('.hierarchical-taxonomy-tree .menu-item--expanded > .parent-toggle').on('click', function (e) {
-        e.preventDefault();
-        $(this).closest('i').toggleClass('arrow-right arrow-down');
-        let isChildVisible = $(this).parent().children('.menu').is(':visible');
-        if (isChildVisible) {
-          $(this).parent().children('.menu').slideUp();
-          $(this).parent().removeClass('active');
-        }
-        else {
-          $(this).parent().children('.menu').slideDown();
-          $(this).parent().addClass('active');
-        }
-      });
-      $('.hierarchical-taxonomy-tree > .menu-item--expanded').on('click', function (e) {
-        e.preventDefault();
-      })
-    }
+    $('.hierarchical-taxonomy-tree .menu-item--expanded > a').on('click', function (e) {
+      e.preventDefault();
+      console.log($(this).closest('i'));
+      $(this).next().toggleClass('arrow-right arrow-down');
+      let isChildVisible = $(this).parent().children('.menu').is(':visible');
+      if (isChildVisible) {
+        $(this).parent().children('.menu').slideUp();
+        $(this).parent().removeClass('active');
+      }
+      else {
+        $(this).parent().children('.menu').slideDown();
+        $(this).parent().addClass('active');
+      }
+    });
+
   });
 })(jQuery, Drupal, drupalSettings);
-
