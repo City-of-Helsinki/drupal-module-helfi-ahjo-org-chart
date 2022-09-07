@@ -3,11 +3,13 @@
 namespace Drupal\helfi_ahjo\Services;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\helfi_ahjo\Utils\TaxonomyUtils;
 use Drupal\taxonomy\Entity\Term;
+use GuzzleHttp\ClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -39,6 +41,13 @@ class AhjoService implements ContainerInjectionInterface {
   protected $entityTypeManager;
 
   /**
+   * A fully-configured Guzzle client to pass to the dam client.
+   *
+   * @var \GuzzleHttp\ClientInterface
+   */
+  protected $guzzleClient;
+
+  /**
    * AHJO Service constructor.
    *
    * @param \Drupal\Core\Extension\ModuleExtensionList $extension_list_module
@@ -47,15 +56,19 @@ class AhjoService implements ContainerInjectionInterface {
    *   Taxonomy utils for tree.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager service.
+   * @param \GuzzleHttp\ClientInterface $guzzleClient
+   *   HTTP client.
    */
   public function __construct(
     ModuleExtensionList $extension_list_module,
     TaxonomyUtils $taxonomyUtils,
-    EntityTypeManagerInterface $entity_type_manager
+    EntityTypeManagerInterface $entity_type_manager,
+    ClientInterface $guzzleClient
   ) {
     $this->moduleExtensionList = $extension_list_module;
     $this->taxonomyUtils = $taxonomyUtils;
     $this->entityTypeManager = $entity_type_manager;
+    $this->guzzleClient = $guzzleClient;
   }
 
   /**
@@ -65,8 +78,16 @@ class AhjoService implements ContainerInjectionInterface {
     return new static(
       $container->get('extension.list.module'),
       $container->get('helfi_ahjo.taxonomy_utils'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('http_client')
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getConfig(): ImmutableConfig {
+    return \Drupal::config('helfi_ahjo.config');
   }
 
   /**
@@ -80,11 +101,13 @@ class AhjoService implements ContainerInjectionInterface {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function insertData() {
-    $jsonFile = file_get_contents(
-      $this->moduleExtensionList->getPath('helfi_ahjo')
-      . '/helsinkiorgchartesimerkki.json');
+    $config = self::getConfig();
 
-    return $this->createTaxonomyTermsTree($jsonFile);
+    $url = sprintf("%s/fi/ahjo-proxy/org-chart/00001/9999?api-key=%s", $config->get('base_url'), $config->get('api_key'));
+
+    $response = $this->guzzleClient->request('GET', $url);
+
+    return $this->createTaxonomyTermsTree($response->getBody()->getContents());
   }
 
   /**
@@ -110,6 +133,8 @@ class AhjoService implements ContainerInjectionInterface {
     }
 
     foreach ($data as $content) {
+      dump($content);
+
       $hierarchy[] = [
         'id' => $content['ID'],
         'parent' => $parentId ?? 0,

@@ -73,6 +73,8 @@ class SoteSection extends BlockBase implements ContainerFactoryPluginInterface {
    */
   public function build() {
     $max_age = 0;
+
+    $this->ahjoService->insertData();
     return [
       '#theme' => 'hierarchical_taxonomy_tree',
       '#menu_tree' => $this->ahjoService->showDataAsTree(),

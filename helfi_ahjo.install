@@ -47,7 +47,6 @@ function helfi_ahjo_install() {
     'bundle' => 'sote_section',
     'label' => 'External Parent ID',
   ])->save();
-
 }
 
 /**
@@ -57,9 +56,3 @@ function helfi_ahjo_uninstall($is_syncing) {
   Vocabulary::load('sote_section')->delete();
 }
 
-/**
- * Implements hook_update_N().
- */
-function helfi_ahjo_update_8101(&$sandbox) {
-  \Drupal::service('helfi_ahjo.ahjo_service')->insertData();
-}
