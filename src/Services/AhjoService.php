@@ -57,7 +57,7 @@ class AhjoService implements ContainerInjectionInterface {
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager service.
    * @param \GuzzleHttp\ClientInterface $guzzleClient
-   *   HTTP client.
+   *   A fully configured Guzzle client to pass to the dam client.
    */
   public function __construct(
     ModuleExtensionList $extension_list_module,
@@ -93,21 +93,22 @@ class AhjoService implements ContainerInjectionInterface {
   /**
    * Get data from api and add it as taxonomy terms tree.
    *
-   * @return array|mixed
-   *   Return array or mixed.
-   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function insertData() {
+  public function fetchDataFromRemote(): string {
     $config = self::getConfig();
-
     $url = sprintf("%s/fi/ahjo-proxy/org-chart/00001/9999?api-key=%s", $config->get('base_url'), $config->get('api_key'));
 
     $response = $this->guzzleClient->request('GET', $url);
 
-    return $this->createTaxonomyTermsTree($response->getBody()->getContents());
+    return $response->getBody()->getContents();
+  }
+
+  public function insertSyncData() {
+    $this->createTaxonomyTermsTree($this->fetchDataFromRemote());
+    $this->syncTaxonomyTermsTree();
   }
 
   /**
@@ -133,7 +134,6 @@ class AhjoService implements ContainerInjectionInterface {
     }
 
     foreach ($data as $content) {
-      dump($content);
 
       $hierarchy[] = [
         'id' => $content['ID'],
@@ -141,12 +141,12 @@ class AhjoService implements ContainerInjectionInterface {
         'title' => $content['Name'],
       ];
 
-      $term_by_external_name = $this->entityTypeManager->getStorage('taxonomy_term')->loadByProperties([
+      $loadByExternalId = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties([
         'vid' => 'sote_section',
         'field_external_id' => $content['ID'],
       ]);
 
-      if (count($term_by_external_name) == 0) {
+      if (count($loadByExternalId) == 0) {
         $term = Term::create([
           'name' => $content['Name'],
           'vid' => 'sote_section',
@@ -154,26 +154,50 @@ class AhjoService implements ContainerInjectionInterface {
           'field_external_parent_id' => $parentId ?? 0,
         ]);
 
-        if (!isset($content->field_external_parent_id->value)
-          || $content->field_external_parent_id->value == NULL
-          || $content->field_external_parent_id->value == '0') {
-          continue;
-        }
-        $term_by_external_id = $this->entityTypeManager->getStorage('taxonomy_term')->loadByProperties([
-          'vid' => 'sote_section',
-          'field_external_id' => $content->field_external_parent_id->value,
-        ]);
-
-        $term->set('parent', reset($term_by_external_id)->tid->value);
         $term->save();
       }
       if (isset($content['OrganizationLevelBelow'])) {
         $this->createTaxonomyTermsTree($content['OrganizationLevelBelow'], $hierarchy, $content['ID']);
       }
-
     }
 
     return $hierarchy;
+  }
+
+  public function addToCron($data, $queue = NULL, $parentId = NULL) {
+    if (!is_array($data)) {
+      $data = Json::decode($data);
+    }
+
+    foreach ($data as $key => $section) {
+      $section['parentId'] = $parentId ?? 0;
+      $queue->createItem($section);
+
+      if (isset($section['OrganizationLevelBelow'])) {
+        $this->addToCron($section['OrganizationLevelBelow'], $queue, $section['ID']);
+      }
+    }
+  }
+
+  public function syncTaxonomyTermsTree() {
+    $terms = $this->entityTypeManager
+      ->getStorage('taxonomy_term')
+      ->loadByProperties(['vid' => 'sote_section']);
+    foreach ($terms as $item) {
+      if (!isset($item->field_external_parent_id->value)
+        || $item->field_external_parent_id->value == NULL
+        || $item->field_external_parent_id->value == '0') {
+        continue;
+      }
+      $loadByExternalId = $this->entityTypeManager->getStorage('taxonomy_term')->loadByProperties([
+        'vid' => 'sote_section',
+        'field_external_id' => $item->field_external_parent_id->value,
+      ]);
+
+      $item->set('parent', reset($loadByExternalId)->tid->value);
+      $item->save();
+
+    }
   }
 
   /**
@@ -183,6 +207,7 @@ class AhjoService implements ContainerInjectionInterface {
    *   Return taxonomy tree.
    */
   public function showDataAsTree() {
+    dump(Json::decode($this->fetchDataFromRemote()));
     return $this->taxonomyUtils->load('sote_section', TRUE);
   }
 

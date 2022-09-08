@@ -3,13 +3,46 @@
 namespace Drupal\helfi_ahjo\Form;
 
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\helfi_ahjo\Services\AhjoService;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Gredi DAM module configuration form.
  */
 class AhjoConfigForm extends ConfigFormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\helfi_ahjo\Services\AhjoService
+   */
+  protected $ahjoService;
+
+  /**
+   * Constructor.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The factory for configuration objects.
+   * @param \Drupal\helfi_ahjo\Services\AhjoService $ahjoService
+   *   Services for Ahjo API.
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, AhjoService $ahjoService) {
+    parent::__construct($config_factory);
+    $this->ahjoService = $ahjoService;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('helfi_ahjo.ahjo_service')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -52,7 +85,7 @@ class AhjoConfigForm extends ConfigFormBase {
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Save Ahjo Configuration'),
+      '#value' => $this->t('Save Ahjo Configuration and Import Data'),
       '#button_type' => 'primary',
     ];
 
@@ -96,7 +129,7 @@ class AhjoConfigForm extends ConfigFormBase {
       ->set('api_key', $form_state->getValue('helfi_ahjo_api_key'))
       ->save();
 
-    parent::submitForm($form, $form_state);
+    $this->ahjoService->insertSyncData();
   }
 
 }
