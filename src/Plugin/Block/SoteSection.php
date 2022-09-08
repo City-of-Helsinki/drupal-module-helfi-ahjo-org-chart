@@ -73,28 +73,26 @@ class SoteSection extends BlockBase implements ContainerFactoryPluginInterface {
    */
   public function build() {
     $max_age = 0;
-    $jsonFile = Json::decode(\Drupal::service('helfi_ahjo.ahjo_service')->fetchDataFromRemote());
 
-    dump($this->ahjoService->addToCron($jsonFile));
-//    return [
-//      '#theme' => 'hierarchical_taxonomy_tree',
-//      '#menu_tree' => $this->ahjoService->showDataAsTree(),
-//      '#cache' => [
-//        'max-age' => $max_age,
-//        'tags' => [
-//          'taxonomy_term_list',
-//        ],
-//      ],
-//      '#current_depth' => 0,
-//      '#vocabulary' => 'sote_section',
-//      '#max_depth' => 500,
-//      '#collapsible' => 1,
-//      '#attached' => [
-//        'library' => [
-//          'helfi_ahjo/hierarchical_taxonomy_tree',
-//        ],
-//      ],
-//    ];
+    return [
+      '#theme' => 'hierarchical_taxonomy_tree',
+      '#menu_tree' => $this->ahjoService->showDataAsTree(),
+      '#cache' => [
+        'max-age' => $max_age,
+        'tags' => [
+          'taxonomy_term_list',
+        ],
+      ],
+      '#current_depth' => 0,
+      '#vocabulary' => 'sote_section',
+      '#max_depth' => 500,
+      '#collapsible' => 1,
+      '#attached' => [
+        'library' => [
+          'helfi_ahjo/hierarchical_taxonomy_tree',
+        ],
+      ],
+    ];
 
   }
 
