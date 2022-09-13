@@ -1,0 +1,57 @@
+{% macro suborganigram(item) %}
+  {% import _self as macros %}
+  <ul class="sub-list">
+    {% for subitem in item %}
+      <li>
+        <div class="node no-child">
+          <div class="employee-card">
+            <div class="department-info">
+              <h4 class="name">{{ subitem.name }}</h4>
+            </div>
+          </div>
+        </div>
+        {% if subitem.subitem %}
+          {{ macros.suborganigram(subitem.subitem) }}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% macro organigram(menu_tree) %}
+{% import _self as macros %}
+  {% for item in menu_tree %}
+      <li>
+        <div class="node no-child">
+          <div class="employee-card">
+            <div class="department-info">
+              <h4 class="name">{{ item.name }}</h4>
+            </div>
+          </div>
+        </div>
+        {% if item.subitem %}
+          {{ macros.suborganigram(item.subitem) }}
+        {% endif %}
+      </li>
+
+  {% endfor %}
+{% endmacro %}
+
+  {% import _self as macros %}
+    <div class="orgchart">
+      <ul class="prime-list">
+        <li>
+          <div class="node no-child">
+            <div class="employee-card">
+              <div class="department-info">
+                <h4 class="name">{{ menu_tree[0].name }}</h4>
+              </div>
+            </div>
+          </div>
+          <ul class="sub-list">
+
+            {{ macros.organigram(menu_tree) }}
+          </ul>
+        </li>
+      </ul>
+    </div>

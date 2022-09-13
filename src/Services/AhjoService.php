@@ -10,6 +10,7 @@ use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\helfi_ahjo\AhjoServiceInterface;
 use Drupal\helfi_ahjo\Utils\TaxonomyUtils;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\Entity\Vocabulary;
 use GuzzleHttp\ClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -154,6 +155,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
           'field_external_parent_id' => $parentId ?? 0,
           'field_section_type' => $content['Type'],
           'field_section_type_id' => $content['TypeId'],
+          'field_o_position' => ['u'],
         ]);
         $term->save();
       }

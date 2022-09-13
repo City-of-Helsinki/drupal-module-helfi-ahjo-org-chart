@@ -38,7 +38,7 @@ class SectionUpdate extends QueueWorkerBase {
 
       $loadTerm->set('field_section_type', $data['Type']);
       $loadTerm->set('field_section_type_id', $data['TypeId']);
-
+      $loadTerm->set('field_o_position', 'u');
       $loadTerm->save();
 
     }
