@@ -28,6 +28,23 @@
         template: "myTemplate",
         editUI: new editForm(),
         enableDragDrop: false,
+
+        menu: {
+          pdfPreview: {
+            text: "PDF Preview",
+            icon: OrgChart.icon.pdf(24,24, '#7A7A7A'),
+            onClick: preview
+          },
+          pdf: { text: "Export PDF" },
+          png: { text: "Export PNG" },
+          svg: { text: "Export SVG" },
+          csv: { text: "Export CSV" }
+        },
+        nodeMenu: {
+          pdf: { text: "Export PDF" },
+          png: { text: "Export PNG" },
+          svg: { text: "Export SVG" }
+        },
           nodeBinding: {
             field_0: "name"
           },
@@ -35,6 +52,11 @@
 
         });
 
+      function preview(){
+        OrgChart.pdfPrevUI.show(chart, {
+          format: 'A4'
+        });
+      }
     }
   };
 })(jQuery, Drupal, drupalSettings);
