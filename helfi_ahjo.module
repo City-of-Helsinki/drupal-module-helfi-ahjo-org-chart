@@ -100,6 +100,6 @@ function helfi_ahjo_cron() {
   /** @var \Drupal\Core\Logger\LoggerChannelInterface $logger */
   $logger = \Drupal::service('logger.factory')->get('helfi_ahjo');
   $logger->info('Total items in the queue: @count.', ['@count' => $count]);
-
+  \Drupal::service('helfi_ahjo.ahjo_service')->syncTaxonomyTermsTree();
   \Drupal::state()->set('helfi_ahjo.last_run', $request_time);
 }

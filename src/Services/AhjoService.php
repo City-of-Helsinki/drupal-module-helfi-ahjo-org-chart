@@ -183,6 +183,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
         $this->addToCron($section['OrganizationLevelBelow'], $queue, $section['ID']);
       }
     }
+    $this->syncTaxonomyTermsTree();
   }
 
   /**

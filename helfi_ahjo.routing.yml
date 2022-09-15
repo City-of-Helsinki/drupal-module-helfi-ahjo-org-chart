@@ -13,9 +13,9 @@ helfi_ahjo.cron_job:
   requirements:
     _permission: 'administer site configuration'
 helfi_ahjo.organizations:
-  path: '/organisationchart'
+  path: '/organizationchart'
   defaults:
-    _controller: '\Drupal\helfi_ahjo\Controller\OrganisationChart::viewOrganigram'
+    _controller: '\Drupal\helfi_ahjo\Controller\OrganizationChart::viewOrganigram'
     _title: 'Organigram'
   requirements:
     _permission: 'access content'

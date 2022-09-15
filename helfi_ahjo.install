@@ -48,6 +48,36 @@ function helfi_ahjo_install() {
     ])->save();
   }
 
+  FieldConfig::create([
+    'field_name' => 'field_o_position',
+    'entity_type' => 'taxonomy_term',
+    'bundle' => 'sote_section',
+    'label' => 'Position',
+    'required' => TRUE,
+  ])->save();
+  FieldConfig::create([
+    'field_name' => 'field_o_image',
+    'entity_type' => 'taxonomy_term',
+    'bundle' => 'sote_section',
+    'label' => 'Image',
+    'required' => TRUE,
+  ])->save();
+
+  FieldConfig::create([
+    'field_name' => 'field_o_url',
+    'entity_type' => 'taxonomy_term',
+    'bundle' => 'sote_section',
+    'label' => 'Url',
+    'required' => TRUE,
+  ])->save();
+  FieldConfig::create([
+    'field_name' => 'field_o_css_classes',
+    'entity_type' => 'taxonomy_term',
+    'bundle' => 'sote_section',
+    'label' => 'CSS Classes',
+    'required' => TRUE,
+  ])->save();
+
 }
 
 /**

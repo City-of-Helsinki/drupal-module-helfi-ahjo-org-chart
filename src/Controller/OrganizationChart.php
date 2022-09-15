@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides route responses for organigrams.module.
  */
-class OrganisationChart extends ControllerBase {
+class OrganizationChart extends ControllerBase {
 
   /**
    * Ahjo Service.
@@ -55,10 +55,9 @@ class OrganisationChart extends ControllerBase {
    */
   public function viewOrganigram() {
     $max_age = 0;
-dump($this->taxonomyUtils->loadJs('sote_section'));
+//    dump(count($this->taxonomyUtils->loadJs('sote_section')));
     return [
       '#theme' => 'organigram_container',
-      '#menu_tree' => $this->ahjoService->showDataAsTree(),
       '#cache' => [
         'max-age' => $max_age,
         'tags' => [
@@ -67,7 +66,10 @@ dump($this->taxonomyUtils->loadJs('sote_section'));
       ],
       '#attached' => [
         'library' => [
-          'helfi_ahjo/hierarchical_taxonomy_tree',
+          'helfi_ahjo/organigram',
+        ],
+        'drupalSettings' => [
+          'helfi_ahjo' => $this->taxonomyUtils->loadJs('sote_section'),
         ],
       ],
     ];
