@@ -155,7 +155,6 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
           'field_external_parent_id' => $parentId ?? 0,
           'field_section_type' => $content['Type'],
           'field_section_type_id' => $content['TypeId'],
-          'field_o_position' => ['u'],
         ]);
         $term->save();
       }
