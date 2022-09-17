@@ -15,11 +15,12 @@
       editForm.prototype.hide = function (showldUpdateTheNode) {
         return false
       }
-      OrgChart.templates.myTemplate = Object.assign({}, OrgChart.templates.ana);
-      OrgChart.templates.myTemplate.field_0 = '<text data-width="230" data-text-overflow="multiline" style="font-size: 16px;" fill="#ffffff" x="125" y="30" text-anchor="middle">{val}</text>';
+      OrgChart.templates.ahjo = Object.assign({}, OrgChart.templates.ana);
+      OrgChart.templates.ahjo.field_0 = '<text data-width="230" data-text-overflow="multiline" style="font-size: 16px;" fill="#ffffff" x="125" y="30" text-anchor="middle">{val}</text>';
+      OrgChart.templates.ahjo.field_1 = '<text data-width="230" data-text-overflow="multiline" style="font-size: 16px;" fill="#ffffff" x="125" y="100" text-anchor="middle">{val}</text>';
       let chart = new OrgChart(document.getElementById("tree"), {
         layout: OrgChart.mixed,
-        template: "myTemplate",
+        template: "ahjo",
         editUI: new editForm(),
         enableDragDrop: false,
         menu: {
@@ -33,9 +34,11 @@
           svg: { text: "Export SVG" },
           csv: { text: "Export CSV" }
         },
-          nodeBinding: {
-            field_0: "name"
-          },
+        searchDisplayField: "name",
+        nodeBinding: {
+          field_0: "name",
+          field_1: "type"
+        },
           nodes: drupalSettings.helfi_ahjo
 
         });
