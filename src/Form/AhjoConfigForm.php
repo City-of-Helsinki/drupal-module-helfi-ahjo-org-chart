@@ -114,7 +114,9 @@ class AhjoConfigForm extends ConfigFormBase {
       '#type' => 'number',
       '#title' => $this->t('Organigram Max Depth'),
       '#default_value' => $config->get('organigram_max_depth'),
-      '#description' => $this->t('Default: 3'),
+      '#min' => 1,
+      '#max' => 5,
+      '#description' => $this->t('Min: 1 - Max: 5 - Default: 3'),
       '#required' => TRUE,
     ];
 

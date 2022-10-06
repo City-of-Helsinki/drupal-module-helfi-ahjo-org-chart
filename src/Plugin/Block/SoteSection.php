@@ -76,7 +76,7 @@ class SoteSection extends BlockBase implements ContainerFactoryPluginInterface {
       ],
       '#current_depth' => 0,
       '#vocabulary' => 'sote_section',
-      '#max_depth' => 500,
+      '#max_depth' => $this->ahjoService->getConfig()->get('organigram_max_depth'),
       '#collapsible' => 1,
       '#attached' => [
         'library' => [
