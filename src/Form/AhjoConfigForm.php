@@ -2,7 +2,6 @@
 
 namespace Drupal\helfi_ahjo\Form;
 
-use Drupal\Component\Utility\Xss;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -94,7 +93,12 @@ class AhjoConfigForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $config = $this->config('helfi_ahjo.config');
 
-    $form['helfi_ahjo_base_url'] = [
+    $form['api_config'] = [
+      '#type' => 'fieldset',
+      '#title' => $this
+        ->t('API Configs'),
+    ];
+    $form['api_config']['helfi_ahjo_base_url'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Ahjo Base URL'),
       '#default_value' => $config->get('base_url'),
@@ -102,7 +106,7 @@ class AhjoConfigForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    $form['helfi_ahjo_api_key'] = [
+    $form['api_config']['helfi_ahjo_api_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Ahjo API Key'),
       '#default_value' => $config->get('api_key'),
@@ -110,13 +114,43 @@ class AhjoConfigForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    $form['organigram_max_depth'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Organigram Max Depth'),
-      '#default_value' => $config->get('organigram_max_depth'),
-      '#min' => 1,
-      '#max' => 5,
-      '#description' => $this->t('Min: 1 - Max: 5 - Default: 3'),
+    $form['cron_config'] = [
+      '#type' => 'fieldset',
+      '#title' => $this
+        ->t('Cron Configs'),
+    ];
+    $form['cron_config']['sync_interval'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Ahjo Sections Update Interval'),
+      '#options' => [
+        '-1' => $this->t('Every cron run'),
+        '3600' => $this->t('Every hour'),
+        '7200' => $this->t('Every 2 hours'),
+        '10800' => $this->t('Every 3 hours'),
+        '14400' => $this->t('Every 4 hours'),
+        '21600' => $this->t('Every 6 hours'),
+        '28800' => $this->t('Every 8 hours'),
+        '43200' => $this->t('Every 12 hours'),
+        '86400' => $this->t('Every 24 hours'),
+      ],
+      '#default_value' => empty($config->get('sync_interval')) ? 86400 : $config->get('sync_interval'),
+      '#description' => $this->t('How often should Ahjo Sections be synced with AhjoProxy?'),
+      '#required' => TRUE,
+    ];
+
+    $form['cron_config']['org_id'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Organisation ID (Start)'),
+      '#default_value' => $config->get('org_id') ?? 00001,
+      '#description' => $this->t('example: 00001'),
+      '#required' => TRUE,
+    ];
+
+    $form['cron_config']['max_depth'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Max Depth'),
+      '#default_value' => $config->get('max_depth') ?? 9999,
+      '#description' => $this->t('example: 9999'),
       '#required' => TRUE,
     ];
 
@@ -126,11 +160,19 @@ class AhjoConfigForm extends ConfigFormBase {
       '#value' => $this->t('Save Ahjo Configuration'),
       '#button_type' => 'primary',
     ];
-    $form['actions']['import_sync'] = [
+
+    $form['cron_config']['actions']['import_sync'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Import Data and Sync'),
+      '#value' => $this->t('Sync now'),
       '#button_type' => 'primary',
       '#submit' => ['::importSyncData'],
+    ];
+
+    $form['actions']['deleteAllData'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Delete all imported data'),
+      '#button_type' => 'primary',
+      '#submit' => ['::deleteAllData'],
     ];
 
     return $form;
@@ -145,8 +187,7 @@ class AhjoConfigForm extends ConfigFormBase {
    *   Form state instance.
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
-    $base_url = Xss::filter($form_state->getValue('helfi_ahjo_base_url'));
-    if (!$base_url) {
+    if (!$form_state->getValue('helfi_ahjo_base_url')) {
       $form_state->setErrorByName(
         'helfi_ahjo_base_url',
         $this->t('Provided base url is not valid.')
@@ -154,18 +195,25 @@ class AhjoConfigForm extends ConfigFormBase {
       return;
     }
 
-    $api_key = Xss::filter($form_state->getValue('helfi_ahjo_api_key'));
-    if (!$api_key) {
+    if (!$form_state->getValue('helfi_ahjo_api_key')) {
       $form_state->setErrorByName(
         'helfi_ahjo_api_key',
         $this->t('Provided api key is not valid.')
       );
     }
 
-    $organigram_max_depth = Xss::filter($form_state->getValue('organigram_max_depth'));
-    if (!$organigram_max_depth || is_int($organigram_max_depth)) {
+    $org_id = $form_state->getValue('org_id');
+    if (!$org_id || is_int($org_id)) {
       $form_state->setErrorByName(
-        'organigram_max_depth',
+        'org_id',
+        $this->t('Provided max depth is not valid.')
+      );
+    }
+
+    $max_depth = $form_state->getValue('max_depth');
+    if (!$max_depth || is_int($max_depth)) {
+      $form_state->setErrorByName(
+        'max_depth',
         $this->t('Provided max depth is not valid.')
       );
     }
@@ -180,6 +228,10 @@ class AhjoConfigForm extends ConfigFormBase {
       ->set('base_url', $form_state->getValue('helfi_ahjo_base_url'))
       ->set('api_key', $form_state->getValue('helfi_ahjo_api_key'))
       ->set('organigram_max_depth', $form_state->getValue('organigram_max_depth'))
+      ->set('sync_interval', $form_state->getValue('sync_interval'))
+      ->set('org_id', $form_state->getValue('org_id'))
+      ->set('max_depth', $form_state->getValue('max_depth'))
+
       ->save();
     $this->messenger->addStatus('Settings are updated!');
 
@@ -189,8 +241,42 @@ class AhjoConfigForm extends ConfigFormBase {
    * Import data and sync it.
    */
   public function importSyncData(array &$form, FormStateInterface $form_state) {
-    $this->ahjoService->insertSyncData();
-    $this->messenger->addStatus('Sections imported! and synchronized!');
+    try {
+      $data = $this->ahjoService->fetchDataFromRemote($form_state->getValue('org_id'), $form_state->getValue('max_depth'));
+    }
+    catch (\Exception $e) {
+      $this->messenger()->addError($this->t('Unable to fetch data from remote'));
+      $form_state->setRebuild(TRUE);
+    }
+
+    $this->ahjoService->createTaxonomyBatch($data);
+    $this->messenger->addStatus('Sections imported and synchronized!');
+  }
+
+  /**
+   * Delete all imported data from sote section taxonomy.
+   */
+  public function deleteAllData(array &$form, FormStateInterface $form_state) {
+    $terms = \Drupal::entityTypeManager()
+      ->getStorage('taxonomy_term')
+      ->loadByProperties(['vid' => 'sote_section']);
+    $operations = [];
+    foreach ($terms as $item) {
+      $operations[] = [
+        '\Drupal\helfi_ahjo\Services\AhjoService::deleteTaxonomyTermsOperation', [$item],
+      ];
+    }
+
+    $batch = [
+      'operations' => $operations,
+      'finished' => [AhjoService::class, 'syncTermsBatchFinished'],
+      'title' => 'Performing an operation',
+      'init_message' => 'Please wait',
+      'progress_message' => 'Completed @current from @total',
+      'error_message' => 'An error occurred',
+    ];
+
+    batch_set($batch);
   }
 
 }

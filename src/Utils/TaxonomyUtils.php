@@ -1,4 +1,5 @@
 <?php
+
 namespace Drupal\helfi_ahjo\Utils;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -26,25 +27,6 @@ class TaxonomyUtils {
   }
 
   /**
-   * Loads the tree of a vocabulary.
-   *
-   * @param string $vocabulary
-   *   Machine name.
-   *
-   * @return array
-   *   Return array of vocabulary tree.
-   */
-  public function load(string $vocabulary): array {
-    $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree($vocabulary);
-    $tree = [];
-    foreach ($terms as $tree_object) {
-      $this->buildTree($tree, $tree_object, $vocabulary, 0);
-    }
-
-    return $tree;
-  }
-
-  /**
    * Populates a tree array given a taxonomy term tree object.
    *
    * @param array $tree
@@ -58,7 +40,7 @@ class TaxonomyUtils {
    * @param int $depth
    *   Depth for tree.
    */
-  protected function buildTree(array &$tree, object $object, string $vocabulary, int $key = 0, int $depth = 0) {
+  public function buildTree(array &$tree, object $object, string $vocabulary, int $key = 0, int $depth = 0) {
     if ($object->depth != 0) {
       return;
     }

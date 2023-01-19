@@ -1,23 +1,9 @@
 hierarchical_taxonomy_tree:
-  version: VERSION
   css:
     theme:
       css/hierarchical-taxonomy-tree.css: {}
   js:
     js/hierarchical-taxonomy-tree.js: {}
-  dependencies:
-    - core/jquery
-    - core/drupal
-    - core/drupalSettings
-    - core/once
-organigram:
-  version: VERSION
-  css:
-    theme:
-      css/orgchart.css: { }
-  js:
-    js/orgchart.js: {}
-    js/buildTree.js: {}
   dependencies:
     - core/jquery
     - core/drupal

@@ -1,45 +1,4 @@
 <?php
-use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
-use Drupal\Component\Serialization\Json;
-use Drupal\Core\Form\FormStateInterface;
-
-/**
- * Implements hook_entity_form_display_alter().
- */
-function helfi_ahjo_entity_form_display_alter(EntityFormDisplayInterface $form_display, array $context) {
-  if ($context['entity_type'] == 'taxonomy_term' && $context['form_mode'] == 'default') {
-    $form_display
-      ->setComponent('field_external_id', [
-        'region' => 'content',
-      ])
-      ->setComponent('field_external_parent_id', [
-        'region' => 'content',
-      ])
-      ->setComponent('field_section_type', [
-        'region' => 'content',
-      ])
-      ->setComponent('field_section_type_id', [
-        'region' => 'content',
-      ])
-      ->setComponent('field_o_position', [
-        'region' => 'content',
-      ]);
-  }
-}
-
-/**
- * Implements hook_form_alter().
- */
-function helfi_ahjo_form_alter(&$form, FormStateInterface $form_state, $form_id)
-{
-  if ($form['#form_id'] == 'taxonomy_term_sote_section_form') {
-    $form['field_external_id']['widget'][0]['#type'] = 'textfield';
-    $form['field_external_parent_id']['widget'][0]['#type'] = 'textfield';
-    $form['field_section_type']['widget'][0]['#type'] = 'textfield';
-    $form['field_section_type_id']['widget'][0]['#type'] = 'textfield';
-  }
-
-}
 
 /**
  * Implements hook_theme().
@@ -47,7 +6,7 @@ function helfi_ahjo_form_alter(&$form, FormStateInterface $form_state, $form_id)
 function helfi_ahjo_theme($existing, $type, $theme, $path) {
   return [
     'hierarchical_taxonomy_tree' => [
-      'variables' => [
+      'builds' => [
         'menu_tree' => [],
         'route_tid' => NULL,
         'vocabulary' => NULL,
@@ -57,7 +16,7 @@ function helfi_ahjo_theme($existing, $type, $theme, $path) {
       ],
     ],
     'organigram_container' => [
-      'variables' => [
+      'builds' => [
         'menu_tree' => [],
       ],
     ],
@@ -81,26 +40,27 @@ function helfi_ahjo_cron() {
     return;
   }
 
-  $count = \Drupal::queue('sote_section_update')->numberOfItems();
-
-  if ($count > 0) {
-    $logger = \Drupal::service('logger.factory')->get('helfi_ahjo');
-    $logger->info('Cron execution has been cancelled because the queue @queue_name is not empty (@count items)..', [
-      '@count' => $count,
-      '@queue_name' => 'Acquia DAM Asset Refresh',
-    ]);
+  try {
+    $data = \Drupal::service('helfi_ahjo.ahjo_service')->fetchDataFromRemote($config->get('org_id'), $config->get('max_depth'));
+    \Drupal::service('helfi_ahjo.ahjo_service')->createTaxonomyBatch($data);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('helfi_ahjo')->error($e);
     return;
   }
 
-  $jsonFile = Json::decode(\Drupal::service('helfi_ahjo.ahjo_service')->fetchDataFromRemote());
-  $queue = \Drupal::queue('sote_section_update');
-  \Drupal::service('helfi_ahjo.ahjo_service')->addToCron($jsonFile, $queue);
-
-  $count = \Drupal::queue('sote_section_update')->numberOfItems();
-
-  /** @var \Drupal\Core\Logger\LoggerChannelInterface $logger */
-  $logger = \Drupal::service('logger.factory')->get('helfi_ahjo');
-  $logger->info('Total items in the queue: @count.', ['@count' => $count]);
-  \Drupal::service('helfi_ahjo.ahjo_service')->syncTaxonomyTermsTree();
   \Drupal::state()->set('helfi_ahjo.last_run', $request_time);
 }
+
+/**
+ * Batch callback to dispatch operations to service.
+ */
+function _helfi_ahjo_batch_dispatcher() {
+  $args = func_get_args();
+  list($service, $method) = explode(':', array_shift($args));
+  // The second argument (context) is passed by reference.
+  $values = $args[1];
+  $args[1] = &$values;
+  call_user_func_array([\Drupal::service($service), $method], $args);
+}
+

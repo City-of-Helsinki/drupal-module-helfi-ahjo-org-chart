@@ -20,11 +20,32 @@ interface AhjoServiceInterface {
   /**
    * Get data from api and add it as taxonomy terms tree.
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @param int $orgId
+   *   Organisation id if its needed.
+   * @param int $maxDepth
+   *   Max depth.
    */
-  public function fetchDataFromRemote();
+  public function fetchDataFromRemote($orgId, $maxDepth);
+
+  /**
+   * Create batch operations for taxonomy sote_section.
+   *
+   * @param array $data
+   *   Data for batch.
+   */
+  public function createTaxonomyBatch(array $data): void;
+
+  /**
+   * Recursive set all information from ahjo api.
+   *
+   * @param array $childData
+   *   Child data param.
+   * @param array $operations
+   *   Operantions param.
+   * @param int $externalParentId
+   *   External parent id param.
+   */
+  public function setAllBatchOperations(array $childData, array &$operations, int $externalParentId): void;
 
   /**
    * Add to cron queue.
@@ -41,14 +62,17 @@ interface AhjoServiceInterface {
   /**
    * Sync sote section taxonomy tree.
    */
-  public function syncTaxonomyTermsTree();
+  public function syncTaxonomyTermsChilds();
 
   /**
    * Create taxonomy tree.
    *
+   * @param array|null $excludedByTypeId
+   *   Exclude by type id.
+   *
    * @return array
    *   Return taxonomy tree.
    */
-  public function showDataAsTree();
+  public function showDataAsTree($excludedByTypeId);
 
 }
