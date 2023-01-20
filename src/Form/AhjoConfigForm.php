@@ -84,7 +84,7 @@ class AhjoConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'gredi_ahjo_config';
+    return 'helfi_ahjo_config';
   }
 
   /**
@@ -243,14 +243,16 @@ class AhjoConfigForm extends ConfigFormBase {
   public function importSyncData(array &$form, FormStateInterface $form_state) {
     try {
       $data = $this->ahjoService->fetchDataFromRemote($form_state->getValue('org_id'), $form_state->getValue('max_depth'));
+      if ($data) {
+        $this->ahjoService->createTaxonomyBatch($data);
+        $this->messenger->addStatus('Sections imported and synchronized!');
+      }
     }
     catch (\Exception $e) {
-      $this->messenger()->addError($this->t('Unable to fetch data from remote'));
+      $this->messenger()->addError($this->t('Unable to fetch remote data. Check API Key/Base URL.'));
       $form_state->setRebuild(TRUE);
     }
 
-    $this->ahjoService->createTaxonomyBatch($data);
-    $this->messenger->addStatus('Sections imported and synchronized!');
   }
 
   /**

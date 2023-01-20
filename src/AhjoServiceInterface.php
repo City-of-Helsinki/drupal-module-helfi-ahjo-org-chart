@@ -60,11 +60,6 @@ interface AhjoServiceInterface {
   public function addToCron(array $data, object $queue, int $parentId = NULL);
 
   /**
-   * Sync sote section taxonomy tree.
-   */
-  public function syncTaxonomyTermsChilds();
-
-  /**
    * Create taxonomy tree.
    *
    * @param array|null $excludedByTypeId
@@ -74,5 +69,49 @@ interface AhjoServiceInterface {
    *   Return taxonomy tree.
    */
   public function showDataAsTree($excludedByTypeId);
+
+  /**
+   * Create taxonomy terms operation.
+   *
+   * @param array $data
+   *   Data param.
+   * @param array $context
+   *   Context param.
+   */
+  public function syncTaxonomyTermsOperation(array $data, array &$context);
+
+  /**
+   * Delete term function.
+   *
+   * @param $item
+   *   Term item.
+   * @param $context
+   *   Context param.
+   */
+  public static function deleteTaxonomyTermsOperation($item, &$context);
+
+  /**
+   * Call batch finished function for batch operation.
+   *
+   * @param string $success
+   *   Success message param.
+   * @param array $results
+   *   Result param.
+   * @param array $operations
+   *   Operations param.
+   */
+  public static function syncTermsBatchFinished(string $success, array $results, array $operations);
+
+  /**
+   * Batch operation finished function.
+   *
+   * @param string $success
+   *   Success message param.
+   * @param array $results
+   *   Results param.
+   * @param array $operations
+   *   Operations param.
+   */
+  public function doSyncTermsBatchFinished(string $success, array $results, array $operations);
 
 }

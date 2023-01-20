@@ -109,6 +109,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
    */
   public function fetchDataFromRemote($orgId = 00001, $maxDepth = 9999): array {
     $config = self::getConfig();
+
     if (strlen($orgId) < 5) {
       $orgId = sprintf('%05d', $orgId);
     }
@@ -118,7 +119,6 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
     }
 
     $url = sprintf("%s/$orgId/$maxDepth?api-key=%s", $config->get('base_url'), $config->get('api_key'));
-
     $response = $this->guzzleClient->request('GET', $url);
     return Json::decode($response->getBody()->getContents());
   }
@@ -147,20 +147,21 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
    * {@inheritDoc}
    */
   public function createTaxonomyBatch(array $data): void {
-    $operations = [];
+    if ($data) {
+      $operations = [];
+      $this->setAllBatchOperations($data, $operations);
 
-    $this->setAllBatchOperations($data, $operations);
+      $batch = [
+        'operations' => $operations,
+        'finished' => [AhjoService::class, 'syncTermsBatchFinished'],
+        'title' => 'Performing an operation',
+        'init_message' => 'Please wait',
+        'progress_message' => 'Completed @current from @total',
+        'error_message' => 'An error occurred',
+      ];
 
-    $batch = [
-      'operations' => $operations,
-      'finished' => [AhjoService::class, 'syncTermsBatchFinished'],
-      'title' => 'Performing an operation',
-      'init_message' => 'Please wait',
-      'progress_message' => 'Completed @current from @total',
-      'error_message' => 'An error occurred',
-    ];
-
-    batch_set($batch);
+      batch_set($batch);
+    }
   }
 
   /**
@@ -201,12 +202,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
   }
 
   /**
-   * Create taxonomy terms operation.
-   *
-   * @param array $data
-   *   Data param.
-   * @param array $context
-   *   Context param.
+   * {@inheritDoc}
    */
   public function syncTaxonomyTermsOperation(array $data, array &$context) {
     if (!isset($context['results'][$data['ID']])) {
@@ -243,12 +239,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
   }
 
   /**
-   * Delete term function.
-   *
-   * @param $item
-   *   Term item.
-   * @param $context
-   *   Context param.
+   * {@inheritDoc}
    */
   public static function deleteTaxonomyTermsOperation($item, &$context) {
     $message = 'Deleting taxonomy terms...';
@@ -259,30 +250,16 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
   }
 
   /**
-   * Call batch finished function for batch operation.
-   *
-   * @param string $success
-   *   Success message param.
-   * @param string $results
-   *   Result param.
-   * @param array $operations
-   *   Operations param.
+   * {@inheritDoc}
    */
-  public static function syncTermsBatchFinished(string $success, string $results, array $operations) {
+  public static function syncTermsBatchFinished(string $success, array $results, array $operations) {
     \Drupal::service('helfi_ahjo.ahjo_service')->doSyncTermsBatchFinished($success, $results, $operations);
   }
 
   /**
-   * Batch operation finished function.
-   *
-   * @param string $success
-   *   Success message param.
-   * @param string $results
-   *   Results param.
-   * @param array $operations
-   *   Operations param.
+   * {@inheritDoc}
    */
-  public function doSyncTermsBatchFinished(string $success, string $results, array $operations) {
+  public function doSyncTermsBatchFinished(string $success, array $results, array $operations) {
     if ($success) {
       $message = t('Terms processed.');
     }
