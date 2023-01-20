@@ -9,3 +9,4 @@ dependencies:
   - select2:select2
   - drupal:path
   - paragraphs_library:paragraphs_library
+  - entity_usage:entity_usage
