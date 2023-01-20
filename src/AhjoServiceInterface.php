@@ -25,7 +25,7 @@ interface AhjoServiceInterface {
    * @param int $maxDepth
    *   Max depth.
    */
-  public function fetchDataFromRemote($orgId, $maxDepth);
+  public function fetchDataFromRemote(int $orgId, int $maxDepth);
 
   /**
    * Create batch operations for taxonomy sote_section.
@@ -83,12 +83,12 @@ interface AhjoServiceInterface {
   /**
    * Delete term function.
    *
-   * @param $item
+   * @param array $item
    *   Term item.
-   * @param $context
+   * @param array $context
    *   Context param.
    */
-  public static function deleteTaxonomyTermsOperation($item, &$context);
+  public static function deleteTaxonomyTermsOperation(array $item, array &$context);
 
   /**
    * Call batch finished function for batch operation.
