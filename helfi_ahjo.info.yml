@@ -3,3 +3,6 @@ description: Organisation information for SOTE section of päätökset site
 package: Custom
 type: module
 core_version_requirement: ^9
+dependencies:
+  - drupal:taxonomy
+  - paragraphs:paragraphs

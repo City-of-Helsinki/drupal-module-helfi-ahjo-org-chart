@@ -5,7 +5,8 @@
     "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
     "require": {
-        "composer/composer": "*"
+        "composer/composer": "*",
+        "drupal/paragraphs": "^1.15"
     },
     "require-dev": {
         "drupal/coder": "dev-8.x-3.x"

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Integrates Drupal with Ahjo API.
+ */
+
+/**
  * Implements hook_theme().
  */
 function helfi_ahjo_theme($existing, $type, $theme, $path) {
@@ -57,10 +62,11 @@ function helfi_ahjo_cron() {
  */
 function _helfi_ahjo_batch_dispatcher() {
   $args = func_get_args();
-  list($service, $method) = explode(':', array_shift($args));
+  $exploded = explode(':', array_shift($args));
+  $service = current($exploded);
+  $method = end($exploded);
   // The second argument (context) is passed by reference.
   $values = $args[1];
   $args[1] = &$values;
   call_user_func_array([\Drupal::service($service), $method], $args);
 }
-
