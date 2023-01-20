@@ -6,7 +6,8 @@
     "minimum-stability": "dev",
     "require": {
         "composer/composer": "*",
-        "drupal/paragraphs": "^1.15"
+        "drupal/paragraphs": "^1.15",
+        "drupal/select2": "^1.14"
     },
     "require-dev": {
         "drupal/coder": "dev-8.x-3.x"
