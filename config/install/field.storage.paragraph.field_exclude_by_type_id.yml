@@ -12,7 +12,7 @@ settings:
   size: normal
 module: core
 locked: false
-cardinality: 10
+cardinality: -1
 translatable: true
 indexes: {  }
 persist_with_no_fields: false

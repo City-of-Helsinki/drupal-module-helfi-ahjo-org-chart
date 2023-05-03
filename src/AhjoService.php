@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\helfi_ahjo\Services;
+namespace Drupal\helfi_ahjo;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ImmutableConfig;
@@ -8,7 +8,6 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\helfi_ahjo\AhjoServiceInterface;
 use Drupal\helfi_ahjo\Utils\TaxonomyUtils;
 use Drupal\taxonomy\Entity\Term;
 use GuzzleHttp\ClientInterface;
@@ -167,7 +166,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
   /**
    * {@inheritDoc}
    */
-  public function addToCron($data, $queue, $parentId = NULL) {
+  public function addToQueue($data, $queue, $parentId = NULL) {
     if (!is_array($data)) {
       $data = Json::decode($data);
     }
@@ -177,7 +176,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
       $queue->createItem($section);
 
       if (isset($section['OrganizationLevelBelow'])) {
-        $this->addToCron($section['OrganizationLevelBelow'], $queue, $section['ID']);
+        $this->addToQueue($section['OrganizationLevelBelow'], $queue, $section['ID']);
       }
     }
   }
@@ -185,7 +184,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
   /**
    * {@inheritDoc}
    */
-  public function showDataAsTree($excludedByTypeId = [], $organization = 0, $maxDepth = 0) {
+  public function getDataAsTree($excludedByTypeId = [], $organization = 0, $maxDepth = 0) {
     $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree('sote_section', $organization, $maxDepth);
 
     $tree = [];

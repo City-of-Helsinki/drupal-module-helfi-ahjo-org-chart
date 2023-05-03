@@ -20,13 +20,7 @@ function helfi_ahjo_theme($existing, $type, $theme, $path) {
         'collapsible' => NULL,
       ],
     ],
-    'organigram_container' => [
-      'builds' => [
-        'menu_tree' => [],
-      ],
-    ],
   ];
-
 }
 
 /**
@@ -45,9 +39,10 @@ function helfi_ahjo_cron() {
     return;
   }
 
+  $ahjsoService = \Drupal::service('helfi_ahjo.ahjo_service');
   try {
-    $data = \Drupal::service('helfi_ahjo.ahjo_service')->fetchDataFromRemote($config->get('org_id'), $config->get('max_depth'));
-    \Drupal::service('helfi_ahjo.ahjo_service')->createTaxonomyBatch($data);
+    $data = $ahjsoService->fetchDataFromRemote($config->get('org_id'), $config->get('max_depth'));
+    $ahjsoService->createTaxonomyBatch($data);
   }
   catch (\Exception $e) {
     \Drupal::logger('helfi_ahjo')->error($e);

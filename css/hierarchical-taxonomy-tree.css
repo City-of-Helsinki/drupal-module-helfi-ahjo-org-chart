@@ -1,4 +1,4 @@
-.arrow-right {
+.hierarchical-taxonomy-tree .arrow-right {
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAALVBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADBoCg+AAAADnRSTlMAAQsWHyMnQk9hg7bU1uPWfIEAAABZSURBVHgBZY9NGoAgCERHI4gM73/csOlzw1ugPH8AEDETbJrHTMIb8z7mz+jfOXOadce5P58VPUVQ4FgmAMnlVlXQCCzjhYTGiihPyqe7rLJsbay0XoYr478zTgfmno75KQAAAABJRU5ErkJggg==);
   background-size: 100% auto;
   display: inline-block;
@@ -7,7 +7,7 @@
   cursor: pointer;
 }
 
-.arrow-down {
+.hierarchical-taxonomy-tree .arrow-down {
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAALVBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADBoCg+AAAADnRSTlMAAQsWHyMnQk9hg7bU1uPWfIEAAABlSURBVHjaZY9bEgARDAQH2Y143f+4K0Op2jI/dBMSrIiq4CRYHzPdwuJYx06NPCdv43fMdyXn4qtNwfoXePkOIOMIj0D/QqFE5nHBkpacU2MJOs3mzm9pyMNOY41cw9X6Pdw1/gc85Qfmz9nu9wAAAABJRU5ErkJggg==);
   background-size: 100% auto;
   display: inline-block;
@@ -40,18 +40,6 @@ ul.hierarchical-taxonomy-tree {
 
 .block-taxonomymenu__tree-item {
   margin-top: 4%;
-}
-
-#wrapper {
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 80em;
-}
-
-#container {
-  float: left;
-  padding: 1em;
-  width: 100%;
 }
 
 ol.organizational-chart,

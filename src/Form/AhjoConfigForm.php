@@ -7,7 +7,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\helfi_ahjo\Services\AhjoService;
+use Drupal\helfi_ahjo\AhjoService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -18,7 +18,7 @@ class AhjoConfigForm extends ConfigFormBase {
   /**
    * The entity type manager.
    *
-   * @var \Drupal\helfi_ahjo\Services\AhjoService
+   * @var \Drupal\helfi_ahjo\AhjoService
    */
   protected $ahjoService;
 
@@ -41,7 +41,7 @@ class AhjoConfigForm extends ConfigFormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
-   * @param \Drupal\helfi_ahjo\Services\AhjoService $ahjoService
+   * @param \Drupal\helfi_ahjo\AhjoService $ahjoService
    *   Services for Ahjo API.
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   Service for messenger.
@@ -265,7 +265,7 @@ class AhjoConfigForm extends ConfigFormBase {
     $operations = [];
     foreach ($terms as $item) {
       $operations[] = [
-        '\Drupal\helfi_ahjo\Services\AhjoService::deleteTaxonomyTermsOperation', [$item],
+        '\Drupal\helfi_ahjo\AhjoService::deleteTaxonomyTermsOperation', [$item],
       ];
     }
 
