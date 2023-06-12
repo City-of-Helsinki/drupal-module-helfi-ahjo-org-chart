@@ -11,7 +11,7 @@ Configuration at /admin/config/ahjo
 - Base url of the API
 - API key
 - Root organisation id - from where to start/keep sync
-- Max depth for sync
+- Max depth for sync.
 
 It has a cron hook that syncs at the set interval in config all the orgs under the configured root org id and max depth.
 
