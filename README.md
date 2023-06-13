@@ -23,7 +23,7 @@ The twig for the paragraph is here - https://github.com/City-of-Helsinki/drupal-
 2. On the Cron Configs fieldset, choose your desired interval for syncing.
 Fill in Organisation ID for CoH. The Max Depth field represents the parameter
 in the request that refers to the depth of the tree being retrieved. (e.g 9999 for entire tree
-or 0003 for three levels below tree)
+or 0003 for three levels below tree).
 3. Use Sync Now to start the batch process that creates the taxonomy tree in Drupal.
 4. The paragraph type 'Sote Section' is available to be referenced from a paragraph entity reference field.
 5. Place the 'Sote Section' paragraph in a page and select from the Organization field the desired
