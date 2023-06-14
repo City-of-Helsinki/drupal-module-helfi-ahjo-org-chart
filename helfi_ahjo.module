@@ -92,7 +92,7 @@ function helfi_ahjo_preprocess_paragraph(&$variables) {
     }
 
     $menu_tree = \Drupal::service('helfi_ahjo.ahjo_service')
-      ->getDataAsTree($excludeByTypeId, $paragraph->get('field_organization')->target_id,  $paragraph->get('field_max_depth')->value);
+      ->getDataAsTree($excludeByTypeId, $paragraph->get('field_organization')->target_id, $paragraph->get('field_max_depth')->value);
     $variables['menu_tree'] = $menu_tree;
     $variables['#cache']['tags'][] = 'taxonomy_term_list:sote_section';
   }
