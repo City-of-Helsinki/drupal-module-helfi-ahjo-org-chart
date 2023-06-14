@@ -20,6 +20,11 @@ function helfi_ahjo_theme($existing, $type, $theme, $path) {
         'collapsible' => NULL,
       ],
     ],
+    'paragraph__sote_section' => [
+      'base hook' => 'paragraph',
+      'template' => 'paragraph--sote-section',
+      'variables' => [],
+    ],
   ];
 }
 
@@ -64,4 +69,31 @@ function _helfi_ahjo_batch_dispatcher() {
   $values = $args[1];
   $args[1] = &$values;
   call_user_func_array([\Drupal::service($service), $method], $args);
+}
+
+/**
+ * Implements hook_preprocess_hook().
+ */
+function helfi_ahjo_preprocess_paragraph(&$variables) {
+
+  $paragraph = $variables['paragraph'];
+  $paragraph_type = $paragraph->getType();
+
+  if ($paragraph_type == 'sote_section') {
+    // @todo this library is only for demo purpose.
+    $variables['#attached']['library'][] = 'helfi_ahjo/hierarchical_taxonomy_tree';
+    $variables['vocabulary'] = 'sote_section';
+    $variables['max_depth'] = $paragraph->get('field_max_depth')->value ?? 0;
+    $variables['collapsible'] = 1;
+
+    $excludeByTypeId = [];
+    foreach ($paragraph->get('field_exclude_by_type_id') as $value) {
+      $excludeByTypeId[] = $value->getString();
+    }
+
+    $menu_tree = \Drupal::service('helfi_ahjo.ahjo_service')
+      ->getDataAsTree($excludeByTypeId, $paragraph->get('field_organization')->target_id,  $paragraph->get('field_max_depth')->value);
+    $variables['menu_tree'] = $menu_tree;
+    $variables['#cache']['tags'][] = 'taxonomy_term_list:sote_section';
+  }
 }
