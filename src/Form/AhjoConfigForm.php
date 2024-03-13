@@ -3,38 +3,16 @@
 namespace Drupal\helfi_ahjo\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\helfi_ahjo\AhjoService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Gredi DAM module configuration form.
+ * AHJO organisation chart module configuration form.
  */
 class AhjoConfigForm extends ConfigFormBase {
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\helfi_ahjo\AhjoService
-   */
-  protected $ahjoService;
-
-  /**
-   * Messenger service.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  protected $messenger;
-
-  /**
-   * Logger factory service.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
-   */
-  protected $loggerFactory;
 
   /**
    * Constructor.
@@ -43,20 +21,14 @@ class AhjoConfigForm extends ConfigFormBase {
    *   The factory for configuration objects.
    * @param \Drupal\helfi_ahjo\AhjoService $ahjoService
    *   Services for Ahjo API.
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   *   Service for messenger.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
-   *   Service for logger factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager.
    */
   public function __construct(
-    ConfigFactoryInterface $config_factory,
-    AhjoService $ahjoService,
-    MessengerInterface $messenger,
-    LoggerChannelFactoryInterface $loggerFactory) {
+    protected ConfigFactoryInterface $config_factory,
+    protected AhjoService $ahjoService,
+    protected EntityTypeManagerInterface $entityTypeManager) {
     parent::__construct($config_factory);
-    $this->ahjoService = $ahjoService;
-    $this->messenger = $messenger;
-    $this->loggerFactory = $loggerFactory;
   }
 
   /**
@@ -66,8 +38,7 @@ class AhjoConfigForm extends ConfigFormBase {
     return new static(
       $container->get('config.factory'),
       $container->get('helfi_ahjo.ahjo_service'),
-      $container->get('messenger'),
-      $container->get('logger.factory')
+      $container->get('entity_type.manager')
     );
   }
 
@@ -259,7 +230,7 @@ class AhjoConfigForm extends ConfigFormBase {
    * Delete all imported data from sote section taxonomy.
    */
   public function deleteAllData(array &$form, FormStateInterface $form_state) {
-    $terms = \Drupal::entityTypeManager()
+    $terms = $this->entityTypeManager
       ->getStorage('taxonomy_term')
       ->loadByProperties(['vid' => 'sote_section']);
     $operations = [];
