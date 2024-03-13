@@ -78,7 +78,7 @@ interface AhjoServiceInterface {
    * @param array $context
    *   Context param.
    */
-  public function syncTaxonomyTermsOperation(array $data, array &$context);
+  public static function syncTaxonomyTermsOperation(array $data, array &$context);
 
   /**
    * Delete term function.
@@ -112,6 +112,6 @@ interface AhjoServiceInterface {
    * @param array $operations
    *   Operations param.
    */
-  public function doSyncTermsBatchFinished(string $success, array $results, array $operations);
+  public static function doSyncTermsBatchFinished(string $success, array $results, array $operations);
 
 }

@@ -2,6 +2,7 @@
 
 namespace Drupal\helfi_ahjo\Utils;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
@@ -10,20 +11,17 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 class TaxonomyUtils {
 
   /**
-   * Entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
    * TaxonomyUtils constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity type manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   *   Config factory.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager) {
-    $this->entityTypeManager = $entityTypeManager;
+  public function __construct(
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected ConfigFactoryInterface $config,
+  ) {
   }
 
   /**
@@ -61,7 +59,7 @@ class TaxonomyUtils {
 
     foreach ($children as $child) {
       foreach ($child_tree_objects as $child_tree_object) {
-        if ($child_tree_object->tid == $child->id()) {
+        if ($child_tree_object->tid === $child->id()) {
           $this->buildTree($object_children, $child_tree_object, $vocabulary, $key, $depth);
           $key++;
         }
@@ -124,12 +122,13 @@ class TaxonomyUtils {
     $child_tree_objects = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree($vocabulary, $object->tid);
 
     $depth++;
-    if ($depth == \Drupal::service('helfi_ahjo.ahjo_service')->getConfig()->get('organigram_max_depth')) {
+    $max_depth = $this->config->get('helfi_ahjo.ahjo_service')->get('organigram_max_depth');
+    if ($max_depth && $depth >= $max_depth) {
       return;
     }
     foreach ($children as $child) {
       foreach ($child_tree_objects as $child_tree_object) {
-        if ($child_tree_object->tid == $child->id()) {
+        if ($child_tree_object->tid === $child->id()) {
           $key++;
           $this->buildJsTree($object_children, $child_tree_object, $vocabulary, $key, $depth);
         }
