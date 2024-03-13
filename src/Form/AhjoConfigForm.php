@@ -2,7 +2,6 @@
 
 namespace Drupal\helfi_ahjo\Form;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -15,31 +14,28 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class AhjoConfigForm extends ConfigFormBase {
 
   /**
-   * Constructor.
+   * The service.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\helfi_ahjo\AhjoService $ahjoService
-   *   Services for Ahjo API.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   Entity type manager.
+   * @var \Drupal\helfi_ahjo\AhjoService
    */
-  public function __construct(
-    protected ConfigFactoryInterface $config_factory,
-    protected AhjoService $ahjoService,
-    protected EntityTypeManagerInterface $entityTypeManager) {
-    parent::__construct($config_factory);
-  }
+  protected AhjoService $ahjoService;
+
+  /**
+   * Entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('helfi_ahjo.ahjo_service'),
-      $container->get('entity_type.manager')
-    );
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->ahjoService = $container->get('helfi_ahjo.ahjo_service');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
   }
 
   /**
@@ -204,7 +200,7 @@ class AhjoConfigForm extends ConfigFormBase {
       ->set('max_depth', $form_state->getValue('max_depth'))
 
       ->save();
-    $this->messenger->addStatus('Settings are updated!');
+    $this->messenger()->addStatus('Settings are updated!');
 
   }
 
@@ -216,7 +212,7 @@ class AhjoConfigForm extends ConfigFormBase {
       $data = $this->ahjoService->fetchDataFromRemote($form_state->getValue('org_id'), $form_state->getValue('max_depth'));
       if ($data) {
         $this->ahjoService->createTaxonomyBatch($data);
-        $this->messenger->addStatus('Sections imported and synchronized!');
+        $this->messenger()->addStatus('Sections imported and synchronized!');
       }
     }
     catch (\Exception $e) {

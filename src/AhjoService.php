@@ -271,14 +271,14 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
   /**
    * {@inheritDoc}
    */
-  public function doSyncTermsBatchFinished(string $success, array $results, array $operations) {
+  public static function doSyncTermsBatchFinished(string $success, array $results, array $operations) {
     if ($success) {
-      $message = $this->t('Terms processed.');
+      $message = t('Terms processed.');
     }
     else {
-      $message = $this->t('Finished with an error.');
+      $message = t('Finished with an error.');
     }
-    $this->messenger->addStatus($message);
+    \Drupal::messenger()->addStatus($message);
   }
 
 }
