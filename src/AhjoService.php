@@ -78,7 +78,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
     TaxonomyUtils $taxonomyUtils,
     EntityTypeManagerInterface $entity_type_manager,
     ClientInterface $guzzleClient,
-    MessengerInterface $messenger
+    MessengerInterface $messenger,
   ) {
     $this->moduleExtensionList = $extension_list_module;
     $this->taxonomyUtils = $taxonomyUtils;

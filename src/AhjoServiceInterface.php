@@ -57,7 +57,7 @@ interface AhjoServiceInterface {
    * @param int|null $parentId
    *   Parent id if it exists.
    */
-  public function addToQueue(array $data, object $queue, int $parentId = NULL);
+  public function addToQueue(array $data, object $queue, ?int $parentId = NULL);
 
   /**
    * Create taxonomy tree.
