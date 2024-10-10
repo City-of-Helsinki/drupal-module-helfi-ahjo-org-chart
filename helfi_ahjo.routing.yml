@@ -1,5 +1,5 @@
 helfi_ahjo.config:
-  path: '/admin/config/ahjo'
+  path: '/admin/config/services/ahjo'
   defaults:
     _form: '\Drupal\helfi_ahjo\Form\AhjoConfigForm'
     _title: 'Helfi Ahjo Config'
