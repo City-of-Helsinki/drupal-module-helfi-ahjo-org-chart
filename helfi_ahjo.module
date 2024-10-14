@@ -97,3 +97,22 @@ function helfi_ahjo_preprocess_paragraph(&$variables) {
     $variables['#cache']['tags'][] = 'taxonomy_term_list:sote_section';
   }
 }
+
+/**
+ * Implements hook_config_ignore_settings_alter().
+ */
+function helfi_ahjo_config_ignore_settings_alter(array &$settings) {
+  // Chatleijuke is used in hammashoito chat in Sote.
+  // Genesyschat might be used in palvelukeskus later but
+  // the block configs already removed from other instances.
+  $add_ignore = [
+    'helfi_ahjo.config*',
+  ];
+
+  foreach ($add_ignore as $config) {
+    if (in_array($config, $settings)) {
+      continue;
+    }
+    array_push($settings, $config);
+  }
+}
