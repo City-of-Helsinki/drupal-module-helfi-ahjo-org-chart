@@ -2,73 +2,40 @@
 
 namespace Drupal\helfi_ahjo\Form;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\helfi_ahjo\AhjoService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Gredi DAM module configuration form.
+ * AHJO organisation chart module configuration form.
  */
 class AhjoConfigForm extends ConfigFormBase {
 
   /**
-   * The entity type manager.
+   * The service.
    *
    * @var \Drupal\helfi_ahjo\AhjoService
    */
-  protected $ahjoService;
+  protected AhjoService $ahjoService;
 
   /**
-   * Messenger service.
+   * Entity type manager.
    *
-   * @var \Drupal\Core\Messenger\MessengerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $messenger;
-
-  /**
-   * Logger factory service.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
-   */
-  protected $loggerFactory;
-
-  /**
-   * Constructor.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\helfi_ahjo\AhjoService $ahjoService
-   *   Services for Ahjo API.
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   *   Service for messenger.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
-   *   Service for logger factory.
-   */
-  public function __construct(
-    ConfigFactoryInterface $config_factory,
-    AhjoService $ahjoService,
-    MessengerInterface $messenger,
-    LoggerChannelFactoryInterface $loggerFactory) {
-    parent::__construct($config_factory);
-    $this->ahjoService = $ahjoService;
-    $this->messenger = $messenger;
-    $this->loggerFactory = $loggerFactory;
-  }
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('helfi_ahjo.ahjo_service'),
-      $container->get('messenger'),
-      $container->get('logger.factory')
-    );
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->ahjoService = $container->get('helfi_ahjo.ahjo_service');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
   }
 
   /**
@@ -233,7 +200,7 @@ class AhjoConfigForm extends ConfigFormBase {
       ->set('max_depth', $form_state->getValue('max_depth'))
 
       ->save();
-    $this->messenger->addStatus('Settings are updated!');
+    $this->messenger()->addStatus('Settings are updated!');
 
   }
 
@@ -245,7 +212,7 @@ class AhjoConfigForm extends ConfigFormBase {
       $data = $this->ahjoService->fetchDataFromRemote($form_state->getValue('org_id'), $form_state->getValue('max_depth'));
       if ($data) {
         $this->ahjoService->createTaxonomyBatch($data);
-        $this->messenger->addStatus('Sections imported and synchronized!');
+        $this->messenger()->addStatus('Sections imported and synchronized!');
       }
     }
     catch (\Exception $e) {
@@ -259,7 +226,7 @@ class AhjoConfigForm extends ConfigFormBase {
    * Delete all imported data from sote section taxonomy.
    */
   public function deleteAllData(array &$form, FormStateInterface $form_state) {
-    $terms = \Drupal::entityTypeManager()
+    $terms = $this->entityTypeManager
       ->getStorage('taxonomy_term')
       ->loadByProperties(['vid' => 'sote_section']);
     $operations = [];

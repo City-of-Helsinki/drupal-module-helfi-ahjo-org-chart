@@ -8,8 +8,10 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\helfi_ahjo\Utils\TaxonomyUtils;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\TermInterface;
 use GuzzleHttp\ClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -19,6 +21,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Factory class for Client.
  */
 class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
+
+  use StringTranslationTrait;
 
   /**
    * The module extension list.
@@ -74,7 +78,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
     TaxonomyUtils $taxonomyUtils,
     EntityTypeManagerInterface $entity_type_manager,
     ClientInterface $guzzleClient,
-    MessengerInterface $messenger
+    MessengerInterface $messenger,
   ) {
     $this->moduleExtensionList = $extension_list_module;
     $this->taxonomyUtils = $taxonomyUtils;
@@ -190,6 +194,9 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
     $tree = [];
     foreach ($terms as $tree_object) {
       $term = $this->entityTypeManager->getStorage('taxonomy_term')->load($tree_object->tid);
+      if (!$term instanceof TermInterface) {
+        continue;
+      }
       $typeId = $term->get('field_type_id')->value ?? NULL;
       if ($typeId && in_array($typeId, $excludedByTypeId)) {
         continue;
@@ -203,10 +210,11 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
   /**
    * {@inheritDoc}
    */
-  public function syncTaxonomyTermsOperation(array $data, array &$context) {
+  public static function syncTaxonomyTermsOperation(array $data, array &$context) {
     if (!isset($context['results'][$data['ID']])) {
       $context['results'][$data['ID']] = NULL;
     }
+
     $message = 'Creating taxonomy terms...';
 
     $loadByExternalId = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties([
@@ -214,7 +222,7 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
       'field_external_id' => $data['ID'],
     ]);
 
-    if (count($loadByExternalId) == 0) {
+    if (count($loadByExternalId) === 0) {
       $term = Term::create([
         'name' => $data['Name'],
         'vid' => 'sote_section',
@@ -225,14 +233,15 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
       $term = current($loadByExternalId);
     }
 
-    $term->set('field_external_id', $data['ID']);
-    $term->set('field_external_parent_id', $data['parentId']);
-    $term->set('field_section_type', $data['Type']);
-    $term->set('field_type_id', $data['TypeId']);
-    $term->set('parent', $context['results'][$data['externalParentId']] ?? NULL);
-    $term->save();
-
-    $context['results'][$data['ID']] = $term->id();
+    if ($term instanceof TermInterface) {
+      $term->set('field_external_id', $data['ID']);
+      $term->set('field_external_parent_id', $data['parentId']);
+      $term->set('field_section_type', $data['Type']);
+      $term->set('field_type_id', $data['TypeId']);
+      $term->set('parent', $context['results'][$data['externalParentId']] ?? NULL);
+      $term->save();
+      $context['results'][$data['ID']] = $term->id();
+    }
 
     $context['message'] = $message;
   }
@@ -240,10 +249,14 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
   /**
    * {@inheritDoc}
    */
-  public static function deleteTaxonomyTermsOperation($item, &$context) {
+  public static function deleteTaxonomyTermsOperation(array $item, array &$context) {
     $message = 'Deleting taxonomy terms...';
 
-    $item->delete();
+    foreach ($item as $term) {
+      if ($term instanceof TermInterface) {
+        $term->delete();
+      }
+    }
 
     $context['message'] = $message;
   }
@@ -258,14 +271,14 @@ class AhjoService implements ContainerInjectionInterface, AhjoServiceInterface {
   /**
    * {@inheritDoc}
    */
-  public function doSyncTermsBatchFinished(string $success, array $results, array $operations) {
+  public static function doSyncTermsBatchFinished(string $success, array $results, array $operations) {
     if ($success) {
       $message = t('Terms processed.');
     }
     else {
       $message = t('Finished with an error.');
     }
-    $this->messenger->addStatus($message);
+    \Drupal::messenger()->addStatus($message);
   }
 
 }

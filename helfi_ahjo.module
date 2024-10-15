@@ -5,6 +5,10 @@
  * Integrates Drupal with Ahjo API.
  */
 
+declare(strict_types=1);
+
+use Drupal\helfi_platform_config\DTO\ParagraphTypeCollection;
+
 /**
  * Implements hook_theme().
  */
@@ -72,6 +76,41 @@ function _helfi_ahjo_batch_dispatcher() {
 }
 
 /**
+ * Implements hook_helfi_paragraph_types().
+ */
+function helfi_ahjo_helfi_paragraph_types() : array {
+  $entities = [
+    'node' => [
+      'landing_page' => [
+        'field_content' => [
+          'sote_section' => 99,
+        ],
+      ],
+      'page' => [
+        'field_content' => [
+          'sote_section' => 99,
+        ],
+        'field_lower_content' => [
+          'sote_section' => 99,
+        ],
+      ],
+    ],
+  ];
+
+  $enabled = [];
+  foreach ($entities as $entityTypeId => $bundles) {
+    foreach ($bundles as $bundle => $fields) {
+      foreach ($fields as $field => $paragraphTypes) {
+        foreach ($paragraphTypes as $paragraphType => $weight) {
+          $enabled[] = new ParagraphTypeCollection($entityTypeId, $bundle, $field, $paragraphType, $weight);
+        }
+      }
+    }
+  }
+  return $enabled;
+}
+
+/**
  * Implements hook_preprocess_hook().
  */
 function helfi_ahjo_preprocess_paragraph(&$variables) {
@@ -95,5 +134,23 @@ function helfi_ahjo_preprocess_paragraph(&$variables) {
       ->getDataAsTree($excludeByTypeId, $paragraph->get('field_organization')->target_id, $paragraph->get('field_max_depth')->value);
     $variables['menu_tree'] = $menu_tree;
     $variables['#cache']['tags'][] = 'taxonomy_term_list:sote_section';
+  }
+}
+
+/**
+ * Implements hook_config_ignore_settings_alter().
+ */
+function helfi_ahjo_config_ignore_settings_alter(array &$settings) {
+  // Prevent config from being imported
+  // before better API key handling is refactored in.
+  $add_ignore = [
+    'helfi_ahjo.config:api_key',
+  ];
+
+  foreach ($add_ignore as $config) {
+    if (in_array($config, $settings)) {
+      continue;
+    }
+    array_push($settings, $config);
   }
 }
